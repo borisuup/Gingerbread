@@ -9,8 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".activities.MainActivity"
+        <activity android:name=".activities.MainActivity"
             android:label="@string/activity_title_main"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -23,6 +22,10 @@
             android:launchMode="singleTop"
             android:screenOrientation="portrait">
         </activity>
+        <provider android:name=".data.SavingsManagerContentProvider"
+            android:authorities="gingerbread.savingsmanager.provider"
+            android:enabled="true"
+            android:exported="false"></provider>
     </application>
 
 </manifest>

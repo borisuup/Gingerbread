@@ -10,7 +10,7 @@
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:layout_weight="1">
 
         <LinearLayout
@@ -29,7 +29,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Bank:"/>
+                    android:text="@string/bank_name"/>
 
                 <EditText
                     android:id="@+id/edit_bank_name"
@@ -50,14 +50,14 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Start Date:"/>
+                    android:text="@string/start_date"/>
 
                 <EditText
                     android:id="@+id/edit_start_date"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="3"
-                    android:inputType="date" />
+                    android:inputType="date"/>
             </LinearLayout>
 
             <LinearLayout
@@ -71,7 +71,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="End Date:" />
+                    android:text="@string/end_date" />
 
                 <EditText
                     android:id="@+id/edit_end_date"
@@ -92,7 +92,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Amount:" />
+                    android:text="@string/amount" />
 
                 <EditText
                     android:id="@+id/edit_amount"
@@ -113,7 +113,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Annualized Yield:" />
+                    android:text="@string/annualized_yield" />
 
                 <EditText
                     android:id="@+id/edit_yield"
@@ -134,7 +134,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="2"
-                    android:text="Expected Interest:"
+                    android:text="@string/expected_interest"
                     android:textColor="@color/colorPrimary" />
 
                 <EditText
@@ -164,7 +164,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="Cancel" />
+            android:text="@string/cancel" />
 
         <Button
             android:id="@+id/btn_save"
@@ -172,7 +172,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="2"
-            android:text="Save" />
+            android:text="@string/save" />
     </LinearLayout>
 
 </LinearLayout>

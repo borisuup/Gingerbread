@@ -169,7 +169,7 @@ public class AddSavingsItemActivity extends AppCompatActivity
                     getContentResolver().insert(SavingsManagerContentProvider.CONTENT_URI, values);
                 }
                 else{
-                    int i = getContentResolver().update(SavingsManagerContentProvider.CONTENT_URI, values, "_id=?",new String[]{ mID });
+                    getContentResolver().update(SavingsManagerContentProvider.CONTENT_URI, values, "_id=" + mID, null);
                 }
 
                 Intent intent = new Intent(this, MainActivity.class);

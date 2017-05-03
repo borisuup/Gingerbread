@@ -72,7 +72,7 @@ public class MainActivity extends AppCompatActivity
         while (cursor.moveToNext()) {
             Map<String,Object> map = new HashMap<>();
             map.put(SavingsProjectTable._ID,
-                    cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_BANK_NAME))
+                    cursor.getLong(cursor.getColumnIndex(SavingsProjectTable._ID))
             );
             map.put(SavingsProjectTable.COLUMN_NAME_BANK_NAME,
                     cursor.getString(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_BANK_NAME))

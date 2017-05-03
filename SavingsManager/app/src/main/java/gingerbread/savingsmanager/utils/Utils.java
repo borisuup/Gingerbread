@@ -3,6 +3,7 @@ package gingerbread.savingsmanager.utils;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -34,6 +35,21 @@ public class Utils {
     public static String formatDate(Date date, String format) {
         SimpleDateFormat formatter = new SimpleDateFormat(format, Locale.US);
         return formatter.format(date);
+    }
+
+    /**
+     * Format a date to string
+     *
+     * @param long   milliseconds
+     * @return formatted date string
+     */
+    public static String formatDate(long milliseconds) {
+        Date date = new Date(milliseconds);
+        return DateFormat.getDateInstance().format(date);
+    }
+
+    public static  Date getDate(String source) throws ParseException {
+        return DateFormat.getDateInstance().parse(source);
     }
 
     /**
@@ -78,7 +94,7 @@ public class Utils {
      * @return a formatted string
      */
     public static String formatFloat(float value) {
-        DecimalFormat df = new DecimalFormat("#.00");
+        DecimalFormat df = new DecimalFormat("###,###.00");
         return df.format(value);
     }
 
@@ -88,15 +104,9 @@ public class Utils {
      * @param str a string of float
      * @return a formatted string
      */
-    public static String getFloat(String str) {
-        float value;
-        try {
-            value = Float.valueOf(str);
-        } catch (NumberFormatException ex) {
-            value = 0.0f;
-        }
-
-        return formatFloat(value);
+    public static float getFloat(String str) throws ParseException {
+        DecimalFormat df = new DecimalFormat("###,###.00");
+        return df.parse(str).floatValue();
     }
 
     /**

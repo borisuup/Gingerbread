@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -15,12 +16,15 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
+
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Map;
 
 import gingerbread.savingsmanager.R;
 import gingerbread.savingsmanager.data.SavingsManagerContentProvider;
-import gingerbread.savingsmanager.data.SavingsProjectEntity;
+import gingerbread.savingsmanager.data.SavingsProjectTable;
 import gingerbread.savingsmanager.utils.Constants;
 import gingerbread.savingsmanager.utils.Utils;
 
@@ -40,6 +44,7 @@ public class AddSavingsItemActivity extends AppCompatActivity
     private Button btnCancel;
     private Button btnSave;
 
+    private String mID;
     private String mBankName;
     private Date mStartDate;
     private Date mEndDate;
@@ -67,6 +72,28 @@ public class AddSavingsItemActivity extends AppCompatActivity
         editInterest = (EditText)findViewById(R.id.edit_interest);
         btnCancel = (Button)findViewById(R.id.btn_cancel);
         btnSave = (Button)findViewById(R.id.btn_save);
+
+        Map<String, Object> map = (Map<String, Object>)this.getIntent().getSerializableExtra(SavingsProjectTable.TABLE_NAME);
+        if(map != null){
+            this.setTitle(R.string.activity_title_edit_savings_item);
+            mID = map.get(SavingsProjectTable._ID).toString();
+            editBankName.setText(map.get(SavingsProjectTable.COLUMN_NAME_BANK_NAME).toString());
+            mBankName = map.get(SavingsProjectTable.COLUMN_NAME_BANK_NAME).toString();
+            editStartDate.setText(map.get(SavingsProjectTable.DISPLAY_START_DATE).toString());
+            mStartDate = (Date)map.get(SavingsProjectTable.COLUMN_NAME_START_DATE);
+            editEndDate.setText(map.get(SavingsProjectTable.DISPLAY_END_DATE).toString());
+            mEndDate = (Date)map.get(SavingsProjectTable.COLUMN_NAME_END_DATE);
+            editAmount.setText(map.get(SavingsProjectTable.DISPLAY_AMOUNT).toString());
+            mAmount = (float)map.get(SavingsProjectTable.COLUMN_NAME_AMOUNT);
+            editYield.setText(map.get(SavingsProjectTable.DISPLAY_YIELD).toString());
+            mYield = (float)map.get(SavingsProjectTable.COLUMN_NAME_YIELD);
+            editInterest.setText(map.get(SavingsProjectTable.DISPLAY_INTEREST).toString());
+            mInterest = (float)map.get(SavingsProjectTable.COLUMN_NAME_INTEREST);
+        }
+        else{
+            mID = null;
+            this.setTitle(R.string.activity_title_edit_savings_item);
+        }
 
         //create DatePickerDialog
         datePickerDialogStart = new DatePickerDialog(
@@ -131,13 +158,19 @@ public class AddSavingsItemActivity extends AppCompatActivity
         else if(v == btnSave) {
             if (mInterest != 0.0f) {
                 ContentValues values = new ContentValues();
-                values.put(SavingsProjectEntity.COLUMN_NAME_BANK_NAME, mBankName);
-                values.put(SavingsProjectEntity.COLUMN_NAME_AMOUNT, mAmount);
-                values.put(SavingsProjectEntity.COLUMN_NAME_YIELD, mYield);
-                values.put(SavingsProjectEntity.COLUMN_NAME_START_DATE, mStartDate.getTime());
-                values.put(SavingsProjectEntity.COLUMN_NAME_END_DATE, mEndDate.getTime());
-                values.put(SavingsProjectEntity.COLUMN_NAME_INTEREST, mInterest);
-                Uri uri = getContentResolver().insert(SavingsManagerContentProvider.CONTENT_URI, values);
+                values.put(SavingsProjectTable.COLUMN_NAME_BANK_NAME, mBankName);
+                values.put(SavingsProjectTable.COLUMN_NAME_AMOUNT, mAmount);
+                values.put(SavingsProjectTable.COLUMN_NAME_YIELD, mYield);
+                values.put(SavingsProjectTable.COLUMN_NAME_START_DATE, mStartDate.getTime());
+                values.put(SavingsProjectTable.COLUMN_NAME_END_DATE, mEndDate.getTime());
+                values.put(SavingsProjectTable.COLUMN_NAME_INTEREST, mInterest);
+
+                if(mID == null){
+                    getContentResolver().insert(SavingsManagerContentProvider.CONTENT_URI, values);
+                }
+                else{
+                    int i = getContentResolver().update(SavingsManagerContentProvider.CONTENT_URI, values, "_id=?",new String[]{ mID });
+                }
 
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
@@ -169,7 +202,6 @@ public class AddSavingsItemActivity extends AppCompatActivity
 
     @Override
     public void onTextChanged(CharSequence s, int start, int before, int count) {
-
     }
 
     @Override
@@ -177,14 +209,22 @@ public class AddSavingsItemActivity extends AppCompatActivity
         mBankName = editBankName.getText().toString().trim();
         String amountStr = editAmount.getText().toString();
         if(!Utils.isNullOrEmpty(amountStr)){
-            mAmount = Float.valueOf(editAmount.getText().toString());
+            try {
+                mAmount = Utils.getFloat(amountStr);
+            } catch (ParseException e) {
+                mAmount = 0.00f;
+            }
         }
         else{
             mAmount = 0.00f;
         }
         String yieldStr = editYield.getText().toString();
         if(!Utils.isNullOrEmpty(yieldStr)){
-            mYield = Float.valueOf(editYield.getText().toString());
+            try {
+                mYield = Utils.getFloat(yieldStr);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         else{
             mYield = 0.00f;

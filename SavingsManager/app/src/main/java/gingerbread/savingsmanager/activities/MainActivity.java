@@ -1,8 +1,10 @@
 package gingerbread.savingsmanager.activities;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,13 +14,31 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ListAdapter;
+import android.widget.ListView;
+import android.widget.SimpleAdapter;
+import android.widget.Toast;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import gingerbread.savingsmanager.R;
+import gingerbread.savingsmanager.data.SavingsManagerContentProvider;
+import gingerbread.savingsmanager.data.SavingsProjectTable;
+import gingerbread.savingsmanager.utils.Constants;
+import gingerbread.savingsmanager.utils.Utils;
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener{
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener,
+        AdapterView.OnItemClickListener, AdapterView.OnItemLongClickListener{
 
     private FloatingActionButton fabAddSavings;
+    private ListView lvSavings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +50,10 @@ public class MainActivity extends AppCompatActivity
         fabAddSavings = (FloatingActionButton) findViewById(R.id.fab_add_savings);
         fabAddSavings.setOnClickListener(this);
 
+        lvSavings = (ListView)findViewById(R.id.lv_savings);
+        lvSavings.setOnItemLongClickListener(this);
+        lvSavings.setOnItemClickListener(this);
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -38,6 +62,60 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Cursor cursor = getContentResolver().query(SavingsManagerContentProvider.CONTENT_URI, null, null, null, "_id desc");
+        List<Map<String, Object>> list = new ArrayList<>();
+        while (cursor.moveToNext()) {
+            Map<String,Object> map = new HashMap<>();
+            map.put(SavingsProjectTable._ID,
+                    cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_BANK_NAME))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_BANK_NAME,
+                    cursor.getString(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_BANK_NAME))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_START_DATE,
+                    new Date(cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_START_DATE)))
+            );
+            map.put(SavingsProjectTable.DISPLAY_START_DATE,
+                    Utils.formatDate(cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_START_DATE)))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_END_DATE,
+                    new Date(cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_END_DATE)))
+            );
+            map.put(SavingsProjectTable.DISPLAY_END_DATE,
+                    Utils.formatDate(cursor.getLong(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_END_DATE)))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_AMOUNT,
+                    cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_AMOUNT))
+            );
+            map.put(SavingsProjectTable.DISPLAY_AMOUNT,
+                    Utils.formatFloat(cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_AMOUNT)))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_YIELD,
+                    cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_YIELD))
+            );
+            map.put(SavingsProjectTable.DISPLAY_YIELD,
+                    Utils.formatFloat(cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_YIELD)))
+            );
+            map.put(SavingsProjectTable.COLUMN_NAME_INTEREST,
+                    cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_INTEREST))
+            );
+            map.put(SavingsProjectTable.DISPLAY_INTEREST,
+                    Utils.formatFloat(cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_INTEREST)))
+            );
+            list.add(map);
+        }
+        ListAdapter listAdapter = new SimpleAdapter(this, list, R.layout.savings_item,
+                new String[]{SavingsProjectTable.COLUMN_NAME_BANK_NAME, SavingsProjectTable.DISPLAY_YIELD,
+                        SavingsProjectTable.DISPLAY_START_DATE, SavingsProjectTable.DISPLAY_END_DATE,SavingsProjectTable.DISPLAY_AMOUNT},
+                new int[]{R.id.txt_bank_name_value, R.id.txt_yield_value,
+                          R.id.txt_start_date_value, R.id.txt_end_date_value, R.id.txt_amount_value}
+        );
+        lvSavings.setAdapter(listAdapter);
     }
 
     @Override
@@ -103,4 +181,25 @@ public class MainActivity extends AppCompatActivity
             startActivity(intent);
         }
     }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        if(parent == lvSavings) {
+            Map<String,String> map = (Map<String, String>) lvSavings.getAdapter().getItem(position);
+            Toast.makeText(this, "Bank Name: " + map.get(SavingsProjectTable.COLUMN_NAME_BANK_NAME) ,Toast.LENGTH_SHORT).show();
+            Log.d(Constants.LOG_TAG, "Click item " + id);
+        }
+    }
+
+    @Override
+    public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        if(parent == lvSavings) {
+            Intent intent = new Intent(getBaseContext(),AddSavingsItemActivity.class);
+            intent.putExtra(SavingsProjectTable.TABLE_NAME, (Serializable) lvSavings.getAdapter().getItem(position));
+            startActivity(intent);
+            return true;
+        }
+        return false;
+    }
+
 }

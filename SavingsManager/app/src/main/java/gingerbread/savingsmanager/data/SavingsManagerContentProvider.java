@@ -45,7 +45,7 @@ public class SavingsManagerContentProvider extends ContentProvider {
 
     @Override
     public int delete( Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+        return database.delete(SavingsProjectTable.TABLE_NAME,selection,selectionArgs);
     }
 
     @Override

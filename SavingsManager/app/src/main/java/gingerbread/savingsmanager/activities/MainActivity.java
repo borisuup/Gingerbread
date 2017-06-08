@@ -18,8 +18,8 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
@@ -39,6 +39,8 @@ public class MainActivity extends AppCompatActivity
 
     private FloatingActionButton fabAddSavings;
     private ListView lvSavings;
+    private float TotalInterest;
+    private TextView totalinterest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +55,7 @@ public class MainActivity extends AppCompatActivity
         lvSavings = (ListView)findViewById(R.id.lv_savings);
         lvSavings.setOnItemLongClickListener(this);
         lvSavings.setOnItemClickListener(this);
+        totalinterest = (TextView) findViewById(R.id.txt_total_interest_value);
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -68,6 +71,7 @@ public class MainActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         Cursor cursor = getContentResolver().query(SavingsManagerContentProvider.CONTENT_URI, null, null, null, "_id desc");
+        TotalInterest = 0;
         List<Map<String, Object>> list = new ArrayList<>();
         while (cursor.moveToNext()) {
             Map<String,Object> map = new HashMap<>();
@@ -107,15 +111,17 @@ public class MainActivity extends AppCompatActivity
             map.put(SavingsProjectTable.DISPLAY_INTEREST,
                     Utils.formatFloat(cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_INTEREST)))
             );
+            TotalInterest += cursor.getFloat(cursor.getColumnIndex(SavingsProjectTable.COLUMN_NAME_INTEREST));
             list.add(map);
         }
         ListAdapter listAdapter = new SimpleAdapter(this, list, R.layout.savings_item,
                 new String[]{SavingsProjectTable.COLUMN_NAME_BANK_NAME, SavingsProjectTable.DISPLAY_YIELD,
-                        SavingsProjectTable.DISPLAY_START_DATE, SavingsProjectTable.DISPLAY_END_DATE,SavingsProjectTable.DISPLAY_AMOUNT},
+                        SavingsProjectTable.DISPLAY_START_DATE, SavingsProjectTable.DISPLAY_END_DATE,SavingsProjectTable.DISPLAY_AMOUNT,SavingsProjectTable.DISPLAY_INTEREST},
                 new int[]{R.id.txt_bank_name_value, R.id.txt_yield_value,
-                          R.id.txt_start_date_value, R.id.txt_end_date_value, R.id.txt_amount_value}
+                          R.id.txt_start_date_value, R.id.txt_end_date_value, R.id.txt_amount_value,R.id.txt_expected_interest}
         );
         lvSavings.setAdapter(listAdapter);
+        totalinterest.setText(Utils.formatFloat(TotalInterest));
     }
 
     @Override
@@ -158,6 +164,8 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+            Intent intent = new Intent(getBaseContext(),AddSavingsItemActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -180,6 +188,7 @@ public class MainActivity extends AppCompatActivity
             Intent intent = new Intent(getBaseContext(),AddSavingsItemActivity.class);
             startActivity(intent);
         }
+        //getSystemService();
     }
 
     @Override

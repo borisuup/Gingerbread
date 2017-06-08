@@ -3,8 +3,6 @@ package gingerbread.savingsmanager.activities;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
-import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -16,7 +14,6 @@ import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.Toast;
-
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -76,6 +73,7 @@ public class AddSavingsItemActivity extends AppCompatActivity
         Map<String, Object> map = (Map<String, Object>)this.getIntent().getSerializableExtra(SavingsProjectTable.TABLE_NAME);
         if(map != null){
             this.setTitle(R.string.activity_title_edit_savings_item);
+            btnCancel.setText("DELETE");
             mID = map.get(SavingsProjectTable._ID).toString();
             editBankName.setText(map.get(SavingsProjectTable.COLUMN_NAME_BANK_NAME).toString());
             mBankName = map.get(SavingsProjectTable.COLUMN_NAME_BANK_NAME).toString();
@@ -92,7 +90,8 @@ public class AddSavingsItemActivity extends AppCompatActivity
         }
         else{
             mID = null;
-            this.setTitle(R.string.activity_title_edit_savings_item);
+            btnCancel.setText("CANCEL");
+            this.setTitle(R.string.activity_title_add_savings_item);
         }
 
         //create DatePickerDialog
@@ -153,6 +152,10 @@ public class AddSavingsItemActivity extends AppCompatActivity
             datePickerDialogEnd.show();
         }
         else if(v == btnCancel){
+            if (btnCancel.getText().equals("DELETE"))
+            {
+                getContentResolver().delete(SavingsManagerContentProvider.CONTENT_URI,"_id=" + mID, null);
+            }
             onBackPressed();
         }
         else if(v == btnSave) {
